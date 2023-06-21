@@ -1,0 +1,44 @@
+name: build on windows
+
+on:
+  push:
+    branches: [buildtest]
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: buildmain
+        run: |
+          cd Hengband
+          nuget restore -SolutionDirectory .
+          msbuild /p:Platform="Win32"
+
+      - name: archive
+        run: |
+          7z a latest.zip hengband.exe lib/
+
+      - name: tag
+        uses: EndBug/latest-tag@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: release
+        uses: ncipollo/release-action@v1 #https://github.com/ncipollo/release-action/tree/main
+        with:
+          name: "latest"
+          allowUpdates: true
+          tag: latest
+          commit: buildtest
+          replacesArtifacts: true
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ./latest.zip
