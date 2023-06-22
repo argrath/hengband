@@ -1,5 +1,6 @@
 /* File: angband.rc */
 #ifdef JP
+#pragma code_page(932)
 #include "ang_jp.rc"
 #else
 #include "ang_eng.rc"
